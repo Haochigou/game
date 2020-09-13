@@ -34,7 +34,7 @@ public:
     int  GetDistance(const CoordinateNode start, const CoordinateNode end) const;
     bool CanPass(const CoordinateNode node) const;
     int  GetCost(const CoordinateNode node) const;
-    std::vector<CoordinateNode> GetNeighbours(const CoordinateNode& node) const;
+    std::vector<CoordinateNode> GetNeighbours(const CoordinateNode node) const;
     
 private:
     void AddObsever(Axx& axx);

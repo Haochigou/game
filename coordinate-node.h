@@ -28,15 +28,17 @@ struct CoordinateNode {
     CoordinateNode()
     {}
 };
+
 namespace std {
     template<>
     struct hash<CoordinateNode> {
         size_t operator() (const CoordinateNode& node) const noexcept
         {
-            return node.value_.pos_;
+            return hash<uint32_t>() (node.value_.pos_);
         }
     };
-};
+}
+
 struct CoordinateNodePair {
     union value
     {

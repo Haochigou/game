@@ -1,5 +1,6 @@
 #include "game-map.h"
 
+#include <iostream>
 #include <climits>
 #include <string.h>
 
@@ -22,10 +23,11 @@ int  GameMap::GetDistance(const CoordinateNode start, const CoordinateNode end) 
 
 bool GameMap::CanPass(const CoordinateNode node) const
 {
+    //std::cout << "value of node is " << currentData_[node.value_.coordinate_.y_ * width_ + node.value_.coordinate_.x_] << std::endl;
     return currentData_[node.value_.coordinate_.y_ * width_ + node.value_.coordinate_.x_] == 0;
 }
 
-std::vector<CoordinateNode> GameMap::GetNeighbours(const CoordinateNode& node) const
+std::vector<CoordinateNode> GameMap::GetNeighbours(const CoordinateNode node) const
 {
     std::vector<CoordinateNode> neighbours(8);
     
@@ -48,10 +50,16 @@ std::vector<CoordinateNode> GameMap::GetNeighbours(const CoordinateNode& node) c
 GameMap::GameMap(const int16_t *data, const uint16_t width, const uint16_t height) 
     : originData_(data), width_(width), height_(height)
 {
-    if (width_ < INT16_MAX && height_ < INT16_MAX && !originData_) {
+    if (width_ < INT16_MAX && height_ < INT16_MAX && originData_) {
         currentData_ = (int16_t *)malloc((uint32_t)width_ * height_ * sizeof(int16_t));
-        if (!currentData_) {
+        if (currentData_) {
             memcpy(currentData_, originData_, (uint32_t)width_ * height_ * sizeof(int16_t));
+            for (int i = 0; i < height_; ++i) {
+                for (int j = 0; j < width_; ++j) {
+                    std::cout << currentData_[i * width_ + j] << ",";
+                }
+                std::cout << std::endl;
+            }
         }
     }
 }
@@ -60,7 +68,7 @@ GameMap::GameMap(const GameMap&& map) : originData_(map.originData_), width_(map
 {
     if (width_ < INT16_MAX && height_ < INT16_MAX && !originData_) {
         currentData_ = (int16_t *)malloc((uint32_t)width_ * height_ * sizeof(int16_t));
-        if (!currentData_) {
+        if (currentData_) {
             memcpy(currentData_, originData_, (uint32_t)width_ * height_ * sizeof(int16_t));
         }
     }
