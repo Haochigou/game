@@ -21,15 +21,21 @@ int  GameMap::GetDistance(const CoordinateNode start, const CoordinateNode end) 
     return deltaX > deltaY ? deltaX : deltaY;
 }
 
-bool GameMap::CanPass(const CoordinateNode node) const
+void GameMap::ResetFlags()
 {
-    //std::cout << "value of node is " << currentData_[node.value_.coordinate_.y_ * width_ + node.value_.coordinate_.x_] << std::endl;
+    std::vector<bool> flags(width_ * height_, false);
+    pathFlags_.swap(flags);
+    
+}
+
+bool GameMap::CanPass(const CoordinateNode node) const
+{    
     return currentData_[node.value_.coordinate_.y_ * width_ + node.value_.coordinate_.x_] == 0;
 }
 
 std::vector<CoordinateNode> GameMap::GetNeighbours(const CoordinateNode node) const
 {
-    std::vector<CoordinateNode> neighbours(8);
+    std::vector<CoordinateNode> neighbours;
     
     for (auto& direction : directions_) {
         CoordinateNode neighbour = node;
@@ -38,7 +44,8 @@ std::vector<CoordinateNode> GameMap::GetNeighbours(const CoordinateNode node) co
 
         if (neighbour.value_.coordinate_.x_ < width_ &&
             neighbour.value_.coordinate_.y_ < height_ &&            
-            CanPass(neighbour))
+            CanPass(neighbour) && 
+            !pathFlags_[neighbour.value_.coordinate_.x_ + neighbour.value_.coordinate_.y_ * width_])
         {            
             neighbours.push_back(neighbour);
         }
@@ -60,16 +67,18 @@ GameMap::GameMap(const int16_t *data, const uint16_t width, const uint16_t heigh
                 }
                 std::cout << std::endl;
             }
+            ResetFlags();
         }
     }
 }
 
-GameMap::GameMap(const GameMap&& map) : originData_(map.originData_), width_(map.width_), height_(map.height_)
+GameMap::GameMap(GameMap&& map) : originData_(map.originData_), width_(map.width_), height_(map.height_)
 {
     if (width_ < INT16_MAX && height_ < INT16_MAX && !originData_) {
         currentData_ = (int16_t *)malloc((uint32_t)width_ * height_ * sizeof(int16_t));
         if (currentData_) {
             memcpy(currentData_, originData_, (uint32_t)width_ * height_ * sizeof(int16_t));
+            ResetFlags();
         }
     }
 }

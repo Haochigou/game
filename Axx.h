@@ -5,25 +5,21 @@
 
 #include <vector>
 
+#include "blockallocator.h"
 #include "game-map.h"
+
 class GameMap;
 
 struct AxxNode {
-    explicit AxxNode(const CoordinateNode& n)
-    {
-        node_ = n;
-    }
+    explicit AxxNode(const CoordinateNode& n) : node_(n)
+    {}
     AxxNode()
     {}
     CoordinateNode node_;
-    AxxNode *parent_;
+    AxxNode *parent_{nullptr};
     int32_t g_{0};
     int32_t h_{0};
-    enum {
-        NOEXIST,
-        IN_OPENLIST,
-        IN_CLOSELIST
-    } status_{NOEXIST};
+    
     int32_t f() const
     {
         return g_ + h_;
@@ -40,7 +36,7 @@ struct AxxNode {
 
 class Axx {
 public:
-    explicit Axx(const GameMap& map);
+    explicit Axx(GameMap& map, BlockAllocator& allocator);
     ~Axx();
 
     std::vector<CoordinateNode> GetPath(CoordinateNode start, CoordinateNode end);
@@ -49,13 +45,11 @@ public:
     void RefreshMap();
     void SetMapRefreshed();
 private:
-    const GameMap& map_; // map can be modified outside
+    GameMap& map_; // map can be modified outside
     
     bool existPath_{false};
     bool mapChanged_{true};
- 
+    BlockAllocator *allocator_;
 };
-
-
 
 #endif

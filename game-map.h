@@ -14,7 +14,7 @@ class Axx;
 class GameMap {
 public:
     GameMap(const int16_t *data, const uint16_t width, const uint16_t height);
-    GameMap(const GameMap&& map);
+    GameMap(GameMap&& map);
     ~GameMap();
 
     friend class Axx;
@@ -39,12 +39,14 @@ public:
 private:
     void AddObsever(Axx& axx);
     void Notify();
-
+    void ResetFlags();
+    //void SetPath(const CoordinateNode node);
     static const std::array<std::pair<int, int>, 8> directions_;
-
+    
 private:
     int16_t *currentData_{nullptr};
     const int16_t *originData_{nullptr};
+    std::vector<bool> pathFlags_;
     uint16_t width_{0};
     uint16_t height_{0};
     std::list<Axx*> axxObservers_;

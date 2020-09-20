@@ -24,9 +24,9 @@ int main()
     CoordinateNode end;
     end.value_.coordinate_.x_ = 9;
     end.value_.coordinate_.y_ = 9;
-
+    BlockAllocator allocator;
     GameMap map(data, 10, 10);
-    Axx axx(map);
+    Axx axx(map, allocator);
     
     struct timeval begin, finish;
     gettimeofday(&begin, NULL);
@@ -36,5 +36,6 @@ int main()
     for (auto& step : path) {
         std::cout << "step x:" << step.value_.coordinate_.x_ << ", y:" << step.value_.coordinate_.y_ << std::endl;
     }
+    std::cout << "number of steps :" << path.size() << std::endl;
     return 0;
 }

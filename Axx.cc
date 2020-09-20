@@ -4,11 +4,14 @@
 #include <queue>
 #include <unordered_map>
 
+
 #include "coordinate-node.h"
 #include "game-map.h"
 
-Axx::Axx(const GameMap& map) : map_(map)
-{}
+Axx::Axx(GameMap& map, BlockAllocator& allocator) : map_(map)
+{
+    allocator_ = &allocator;
+}
 
 Axx::~Axx()
 {}
@@ -21,48 +24,49 @@ std::vector<CoordinateNode> Axx::GetPath(CoordinateNode s, CoordinateNode e)
         
     }
 
-
-    AxxNode *start = new AxxNode(s);
-    AxxNode *end = new AxxNode(e);
-    std::priority_queue<AxxNode> openList;
-    std::unordered_map<CoordinateNode, AxxNode *> nodes = {{s, start}, {e, end}};
-    openList.push(*start);
+    AxxNode *start = new(allocator_->allocate(sizeof(AxxNode))) AxxNode(s);
+    
+    std::vector<AxxNode*> openList;
+    
+    openList.push_back(start);
     bool reachEnd = false;
+    AxxNode *n = nullptr;
     while (!openList.empty()) {
-        auto node = openList.top();
-        auto pnode = nodes.find(node.node_);
-        auto neighbours = map_.GetNeighbours(node.node_);
-        auto costed = map_.GetCost(node.node_);
-        for (auto& neighbour : neighbours) {
-            AxxNode *n = new AxxNode(neighbour);
-            n->parent_ = nodes.find(pnode->first)->second;
-            auto pn = nodes.find(n->node_);
-            if (pn == nodes.end() || pn->second->status_ != AxxNode::IN_CLOSELIST) {
-                n->h_ = node.h_ + costed;
-                n->g_ = map_.GetDistance(neighbour, e);
-                openList.push(*n);
-                nodes[n->node_] = n;
-                if (neighbour == e) {
-                    reachEnd = true;
-                    break;
-                }
-                if (reachEnd) {
-                    break;
-                }
-            }
-        }
-        pnode->second->status_ = AxxNode::IN_CLOSELIST;
+        std::make_heap(openList.begin(), openList.end(),[](const AxxNode *a, const AxxNode *b)->bool
+        {
+            return a->f() > b->f();
+        });
+        std::pop_heap(openList.begin(), openList.end(), [](const AxxNode *a, const AxxNode *b)->bool
+        {
+            return a->f() > b->f();
+        });
+        auto node = openList.back();
+        openList.pop_back();
         
-        openList.pop();
-    }
-    auto itr = nodes.find(e);
-    if (itr != nodes.end()) {
-        auto en = itr->second;
-        while (!(en->node_ == s)) {
-            path.push_back(en->node_);
-            en = en->parent_;
-        }
+        auto neighbours = map_.GetNeighbours(node->node_);
+        auto costed = map_.GetCost(node->node_);
+        for (auto& neighbour : neighbours) {
+            n = new(allocator_->allocate(sizeof(AxxNode))) AxxNode(neighbour);
+            map_.pathFlags_[neighbour.value_.coordinate_.x_ + neighbour.value_.coordinate_.y_ * map_.width_] = true;
+            n->parent_ = node;
+            
+            n->h_ = node->h_ + costed;
 
+            n->g_ = map_.GetDistance(neighbour, e);
+            if (neighbour == e) {
+                reachEnd = true;
+                break;
+            }
+            openList.push_back(n);
+        }        
+        if (reachEnd) {
+            break;
+        }            
+    }
+    
+    while (n->parent_ != nullptr) {
+        path.push_back(n->node_);
+        n = n->parent_;
     }
     mapChanged_ = false; // 运算完一次后，设置地图为没有变化
     return path;
