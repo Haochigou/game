@@ -36,6 +36,8 @@ public:
     int  GetCost(const CoordinateNode node) const;
     std::vector<CoordinateNode> GetNeighbours(const CoordinateNode node) const;
     
+    int GetCanPassBlockNum() const;
+    
 private:
     void AddObsever(Axx& axx);
     void Notify();

@@ -28,6 +28,7 @@ int main()
     GameMap map(data, 10, 10);
     Axx axx(map, allocator);
     
+    axx.Prepare();
     struct timeval begin, finish;
     gettimeofday(&begin, NULL);
     auto path = axx.GetPath(start, end);

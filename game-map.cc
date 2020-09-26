@@ -28,6 +28,21 @@ void GameMap::ResetFlags()
     
 }
 
+int GameMap::GetCanPassBlockNum() const
+{
+    int cnt = 0;
+    if (!originData_) {
+        for (uint16_t y = 0; y < height_; ++y) {
+            for (uint16_t x = 0; x < width_; ++x) {
+                if (CanPass(CoordinateNode(x, y))) {
+                    ++cnt;
+                }
+            }
+        }
+    }
+    return cnt;
+}
+
 bool GameMap::CanPass(const CoordinateNode node) const
 {    
     return currentData_[node.value_.coordinate_.y_ * width_ + node.value_.coordinate_.x_] == 0;

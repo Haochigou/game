@@ -25,6 +25,11 @@ struct CoordinateNode {
     {
         value_.pos_ = n.value_.pos_;
     }
+    CoordinateNode(uint16_t x, uint16_t y)
+    {
+        value_.coordinate_.x_ = x;
+        value_.coordinate_.y_ = y;
+    }
     CoordinateNode()
     {}
 };
